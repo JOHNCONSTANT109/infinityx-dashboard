@@ -1,8 +1,8 @@
-export const dynamic = 'force-dynamic';
-
-  import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
   import { getDb } from "@/lib/db";
   import { getSession } from "@/lib/session";
+
+  export const dynamic = "force-dynamic";
 
   interface UserDoc {
     _id: string;
@@ -26,24 +26,24 @@ export const dynamic = 'force-dynamic';
 
   const TIERS = [
     { name: "Rookie",       emoji: "🌱",  min: 0 },
-    { name: "Trainer",      emoji: "🎒",  min: 25_000 },
-    { name: "Veteran",      emoji: "🛡",  min: 100_000 },
-    { name: "Expert",       emoji: "🎯",  min: 300_000 },
-    { name: "Elite",        emoji: "✨",  min: 750_000 },
-    { name: "Ace",          emoji: "🔶",  min: 1_500_000 },
-    { name: "Master",       emoji: "🌀",  min: 3_000_000 },
-    { name: "Champion",     emoji: "☣️",  min: 6_000_000 },
-    { name: "Legend",       emoji: "👑",  min: 12_000_000 },
-    { name: "Mythical I",   emoji: "🌌",  min: 25_000_000 },
-    { name: "Mythical II",  emoji: "🌌",  min: 50_000_000 },
-    { name: "Mythical III", emoji: "🌌",  min: 100_000_000 },
-    { name: "Hero I",       emoji: "⚡",  min: 200_000_000 },
-    { name: "Hero II",      emoji: "⚡",  min: 400_000_000 },
-    { name: "Hero III",     emoji: "⚡",  min: 750_000_000 },
-    { name: "Divine I",     emoji: "💫",  min: 1_500_000_000 },
-    { name: "Divine II",    emoji: "💫",  min: 3_000_000_000 },
-    { name: "Deity I",      emoji: "🌠",  min: 6_000_000_000 },
-    { name: "Deity II",     emoji: "🌠",  min: 12_000_000_000 },
+    { name: "Trainer",      emoji: "🎒",  min: 25000 },
+    { name: "Veteran",      emoji: "🛡",  min: 100000 },
+    { name: "Expert",       emoji: "🎯",  min: 300000 },
+    { name: "Elite",        emoji: "✨",  min: 750000 },
+    { name: "Ace",          emoji: "🔶",  min: 1500000 },
+    { name: "Master",       emoji: "🌀",  min: 3000000 },
+    { name: "Champion",     emoji: "☣️",  min: 6000000 },
+    { name: "Legend",       emoji: "👑",  min: 12000000 },
+    { name: "Mythical I",   emoji: "🌌",  min: 25000000 },
+    { name: "Mythical II",  emoji: "🌌",  min: 50000000 },
+    { name: "Mythical III", emoji: "🌌",  min: 100000000 },
+    { name: "Hero I",       emoji: "⚡",  min: 200000000 },
+    { name: "Hero II",      emoji: "⚡",  min: 400000000 },
+    { name: "Hero III",     emoji: "⚡",  min: 750000000 },
+    { name: "Divine I",     emoji: "💫",  min: 1500000000 },
+    { name: "Divine II",    emoji: "💫",  min: 3000000000 },
+    { name: "Deity I",      emoji: "🌠",  min: 6000000000 },
+    { name: "Deity II",     emoji: "🌠",  min: 12000000000 },
   ];
 
   function getRankTier(xp: number) {
@@ -75,14 +75,14 @@ export const dynamic = 'force-dynamic';
       const tier = getRankTier(xp);
 
       return NextResponse.json({
-        username: user.name || session.username || `Player_${session.number?.slice(-4)}`,
+        username: user.name || session.username || ("Player_" + (session.number || "").slice(-4)),
         number: session.number,
         party: user.party || [],
         pc: user.pc || [],
         gold: economy?.wallet || 0,
         bank: economy?.bank || 0,
         xp,
-        rank: `${tier.emoji} ${tier.name}`,
+        rank: tier.emoji + " " + tier.name,
         rankName: tier.name,
         level: tier.level,
         badges: user.badges || 0,

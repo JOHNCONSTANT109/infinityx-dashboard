@@ -1,7 +1,7 @@
-export const dynamic = 'force-dynamic';
-
-  import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
   import { getDb } from "@/lib/db";
+
+  export const dynamic = "force-dynamic";
 
   interface EconomyDoc {
     _id: string;
@@ -19,24 +19,24 @@ export const dynamic = 'force-dynamic';
 
   const TIERS = [
     { name: "Rookie",       emoji: "🌱",  min: 0 },
-    { name: "Trainer",      emoji: "🎒",  min: 25_000 },
-    { name: "Veteran",      emoji: "🛡",  min: 100_000 },
-    { name: "Expert",       emoji: "🎯",  min: 300_000 },
-    { name: "Elite",        emoji: "✨",  min: 750_000 },
-    { name: "Ace",          emoji: "🔶",  min: 1_500_000 },
-    { name: "Master",       emoji: "🌀",  min: 3_000_000 },
-    { name: "Champion",     emoji: "☣️",  min: 6_000_000 },
-    { name: "Legend",       emoji: "👑",  min: 12_000_000 },
-    { name: "Mythical I",   emoji: "🌌",  min: 25_000_000 },
-    { name: "Mythical II",  emoji: "🌌",  min: 50_000_000 },
-    { name: "Mythical III", emoji: "🌌",  min: 100_000_000 },
-    { name: "Hero I",       emoji: "⚡",  min: 200_000_000 },
-    { name: "Hero II",      emoji: "⚡",  min: 400_000_000 },
-    { name: "Hero III",     emoji: "⚡",  min: 750_000_000 },
-    { name: "Divine I",     emoji: "💫",  min: 1_500_000_000 },
-    { name: "Divine II",    emoji: "💫",  min: 3_000_000_000 },
-    { name: "Deity I",      emoji: "🌠",  min: 6_000_000_000 },
-    { name: "Deity II",     emoji: "🌠",  min: 12_000_000_000 },
+    { name: "Trainer",      emoji: "🎒",  min: 25000 },
+    { name: "Veteran",      emoji: "🛡",  min: 100000 },
+    { name: "Expert",       emoji: "🎯",  min: 300000 },
+    { name: "Elite",        emoji: "✨",  min: 750000 },
+    { name: "Ace",          emoji: "🔶",  min: 1500000 },
+    { name: "Master",       emoji: "🌀",  min: 3000000 },
+    { name: "Champion",     emoji: "☣️",  min: 6000000 },
+    { name: "Legend",       emoji: "👑",  min: 12000000 },
+    { name: "Mythical I",   emoji: "🌌",  min: 25000000 },
+    { name: "Mythical II",  emoji: "🌌",  min: 50000000 },
+    { name: "Mythical III", emoji: "🌌",  min: 100000000 },
+    { name: "Hero I",       emoji: "⚡",  min: 200000000 },
+    { name: "Hero II",      emoji: "⚡",  min: 400000000 },
+    { name: "Hero III",     emoji: "⚡",  min: 750000000 },
+    { name: "Divine I",     emoji: "💫",  min: 1500000000 },
+    { name: "Divine II",    emoji: "💫",  min: 3000000000 },
+    { name: "Deity I",      emoji: "🌠",  min: 6000000000 },
+    { name: "Deity II",     emoji: "🌠",  min: 12000000000 },
   ];
 
   function getRankLabel(xp: number): string {
@@ -44,7 +44,7 @@ export const dynamic = 'force-dynamic';
     for (let i = 0; i < TIERS.length; i++) {
       if (xp >= TIERS[i].min) idx = i;
     }
-    return `${TIERS[idx].emoji} ${TIERS[idx].name}`;
+    return TIERS[idx].emoji + " " + TIERS[idx].name;
   }
 
   export async function GET(req: NextRequest) {
@@ -75,7 +75,7 @@ export const dynamic = 'force-dynamic';
           const u = userMap[String(e._id)] || {};
           return {
             rank: i + 1,
-            username: u.name || `Player_${String(e._id).slice(-4)}`,
+            username: u.name || ("Player_" + String(e._id).slice(-4)),
             value: e.wallet || 0,
             tier: getRankLabel(u.xp || 0),
           };
@@ -95,10 +95,7 @@ export const dynamic = 'force-dynamic';
 
       const users = await db
         .collection<UserDoc>("users")
-        .find(
-          {},
-          { projection: { _id: 1, name: 1, xp: 1, catches: 1, quizWins: 1, cards: 1 } }
-        )
+        .find({}, { projection: { _id: 1, name: 1, xp: 1, catches: 1, quizWins: 1, cards: 1 } })
         .sort(sortField)
         .limit(50)
         .toArray();
@@ -112,7 +109,7 @@ export const dynamic = 'force-dynamic';
 
         return {
           rank: i + 1,
-          username: u.name || `Player_${String(u._id).slice(-4)}`,
+          username: u.name || ("Player_" + String(u._id).slice(-4)),
           value,
           tier: getRankLabel(u.xp || 0),
         };

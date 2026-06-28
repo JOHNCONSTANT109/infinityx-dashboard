@@ -1,9 +1,9 @@
-export const dynamic = 'force-dynamic';
-
-  import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
   import { createHash } from "crypto";
   import { getDb } from "@/lib/db";
   import { getSession } from "@/lib/session";
+
+  export const dynamic = "force-dynamic";
 
   interface DashAccountDoc {
     _id: string;
@@ -42,14 +42,14 @@ export const dynamic = 'force-dynamic';
 
       if (!dashAccount) {
         return NextResponse.json(
-          { error: "No dashboard account found. Use -addnumber in the bot first." },
+          { error: "No dashboard account found. Use !addnumber in the bot first." },
           { status: 404 }
         );
       }
 
       if (!dashAccount.passwordHash || !dashAccount.passwordSalt) {
         return NextResponse.json(
-          { error: "No password set. Use -webpass in the bot first." },
+          { error: "No password set. Use !webpass in the bot first." },
           { status: 401 }
         );
       }
@@ -67,7 +67,7 @@ export const dynamic = 'force-dynamic';
         .collection<UserDoc>("users")
         .findOne({ _id: botKey });
 
-      const username = userDoc?.name || `Player_${cleanNumber.slice(-4)}`;
+      const username = userDoc?.name || ("Player_" + cleanNumber.slice(-4));
 
       const session = await getSession();
       session.isLoggedIn = true;
