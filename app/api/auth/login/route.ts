@@ -3,6 +3,18 @@ import { createHash } from "crypto";
 import { getDb } from "@/lib/db";
 import { getSession } from "@/lib/session";
 
+interface DashAccountDoc {
+  _id: string;
+  botKey?: string;
+  passwordHash?: string;
+  passwordSalt?: string;
+}
+
+interface UserDoc {
+  _id: string;
+  name?: string;
+}
+
 function hashPassword(password: string, salt: string): string {
   return createHash("sha256").update(password + salt).digest("hex");
 }
@@ -25,7 +37,7 @@ export async function POST(req: NextRequest) {
     // The bot stores dashboard accounts in 'dashboard_accounts' collection
     // _id = phone number digits, botKey = canonical user key
     const dashAccount = await db
-      .collection("dashboard_accounts")
+      .collection<DashAccountDoc>("dashboard_accounts")
       .findOne({ _id: cleanNumber });
 
     if (!dashAccount) {
@@ -54,7 +66,7 @@ export async function POST(req: NextRequest) {
     // Fetch username from users collection using botKey
     const botKey = dashAccount.botKey || cleanNumber;
     const userDoc = await db
-      .collection("users")
+      .collection<UserDoc>("users")
       .findOne({ _id: botKey });
 
     const username =

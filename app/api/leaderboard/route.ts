@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 
+interface EconomyDoc {
+  _id: string;
+  wallet?: number;
+}
+
+interface UserDoc {
+  _id: string;
+  name?: string;
+  xp?: number;
+  catches?: number;
+  quizWins?: number;
+  cards?: number;
+}
+
 const TIERS = [
   { name: "Rookie",       emoji: "🌱",  min: 0 },
   { name: "Trainer",      emoji: "🎒",  min: 25_000 },
@@ -40,9 +54,8 @@ export async function GET(req: NextRequest) {
 
     // Gold is stored in the 'economy' collection, everything else in 'users'
     if (category === "gold") {
-      // Get top 50 by wallet from economy, join with users for name
       const economies = await db
-        .collection("economy")
+        .collection<EconomyDoc>("economy")
         .find({}, { projection: { _id: 1, wallet: 1 } })
         .sort({ wallet: -1 })
         .limit(50)
@@ -50,7 +63,7 @@ export async function GET(req: NextRequest) {
 
       const botKeys = economies.map((e) => e._id);
       const users = await db
-        .collection("users")
+        .collection<UserDoc>("users")
         .find({ _id: { $in: botKeys } }, { projection: { _id: 1, name: 1, xp: 1 } })
         .toArray();
 
@@ -81,7 +94,7 @@ export async function GET(req: NextRequest) {
     const sortField = sortMap[category] || sortMap.xp;
 
     const users = await db
-      .collection("users")
+      .collection<UserDoc>("users")
       .find(
         {},
         { projection: { _id: 1, name: 1, xp: 1, catches: 1, quizWins: 1, cards: 1 } }

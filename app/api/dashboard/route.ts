@@ -2,7 +2,27 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getSession } from "@/lib/session";
 
-// Rank tiers — matches the bot's TIERS array in format.js exactly
+interface UserDoc {
+  _id: string;
+  name?: string;
+  xp?: number;
+  party?: unknown[];
+  pc?: unknown[];
+  cards?: number;
+  quizWins?: number;
+  catches?: number;
+  wins?: number;
+  losses?: number;
+  badges?: number;
+}
+
+interface EconomyDoc {
+  _id: string;
+  wallet?: number;
+  bank?: number;
+}
+
+// Rank tiers — matches the bot's TIERS array exactly
 const TIERS = [
   { name: "Rookie",       emoji: "🌱",  min: 0 },
   { name: "Trainer",      emoji: "🎒",  min: 25_000 },
@@ -30,7 +50,7 @@ function getRankTier(xp: number) {
   for (let i = 0; i < TIERS.length; i++) {
     if (xp >= TIERS[i].min) idx = i;
   }
-  return TIERS[idx];
+  return { ...TIERS[idx], level: idx + 1 };
 }
 
 export async function GET() {
@@ -44,10 +64,10 @@ export async function GET() {
     const botKey = session.botKey;
 
     // Users collection: party, pc, xp, catches, cards, quizWins, name
-    const user = await db.collection("users").findOne({ _id: botKey });
+    const user = await db.collection<UserDoc>("users").findOne({ _id: botKey });
 
     // Economy collection: wallet (gold), bank
-    const economy = await db.collection("economy").findOne({ _id: botKey });
+    const economy = await db.collection<EconomyDoc>("economy").findOne({ _id: botKey });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -66,6 +86,8 @@ export async function GET() {
       xp,
       rank: `${tier.emoji} ${tier.name}`,
       rankName: tier.name,
+      level: tier.level,
+      badges: user.badges || 0,
       cards: user.cards || 0,
       quizWins: user.quizWins || 0,
       quizLosses: 0,

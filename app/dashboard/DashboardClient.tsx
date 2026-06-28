@@ -3,8 +3,7 @@ import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
-  Trophy, Star, Coins, CreditCard, HelpCircle, Zap, Shield, Database,
-  TrendingUp, Package, User, Loader2
+  TrendingUp, User, Loader2
 } from "lucide-react";
 
 interface Pokemon {
@@ -30,23 +29,37 @@ interface DashboardData {
   bank: number;
   xp: number;
   rank: string;
+  rankName: string;
+  level: number;
+  badges: number;
   cards: number;
   quizWins: number;
   quizLosses: number;
   totalCatches: number;
-  level: number;
-  badges: number;
+  wins: number;
+  losses: number;
 }
 
 const RANK_COLORS: Record<string, string> = {
-  Beginner: "bg-gray-500/20 text-gray-400 border-gray-500/30",
-  Bronze: "bg-orange-900/20 text-orange-400 border-orange-700/30",
-  Silver: "bg-slate-400/20 text-slate-300 border-slate-400/30",
-  Gold: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-  Platinum: "bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
-  Diamond: "bg-blue-500/20 text-blue-300 border-blue-400/30",
-  Master: "bg-purple-600/20 text-purple-300 border-purple-500/30",
-  Legend: "bg-red-500/20 text-red-300 border-red-500/30",
+  Rookie:        "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  Trainer:       "bg-orange-900/20 text-orange-400 border-orange-700/30",
+  Veteran:       "bg-slate-400/20 text-slate-300 border-slate-400/30",
+  Expert:        "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  Elite:         "bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
+  Ace:           "bg-blue-500/20 text-blue-300 border-blue-400/30",
+  Master:        "bg-purple-600/20 text-purple-300 border-purple-500/30",
+  Champion:      "bg-red-500/20 text-red-300 border-red-500/30",
+  Legend:        "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  "Mythical I":  "bg-indigo-500/20 text-indigo-300 border-indigo-400/30",
+  "Mythical II": "bg-indigo-600/20 text-indigo-400 border-indigo-500/30",
+  "Mythical III":"bg-indigo-700/20 text-indigo-500 border-indigo-600/30",
+  "Hero I":      "bg-pink-500/20 text-pink-300 border-pink-400/30",
+  "Hero II":     "bg-pink-600/20 text-pink-400 border-pink-500/30",
+  "Hero III":    "bg-pink-700/20 text-pink-500 border-pink-600/30",
+  "Divine I":    "bg-violet-500/20 text-violet-300 border-violet-400/30",
+  "Divine II":   "bg-violet-700/20 text-violet-500 border-violet-600/30",
+  "Deity I":     "bg-amber-500/20 text-amber-300 border-amber-400/30",
+  "Deity II":    "bg-amber-700/20 text-amber-500 border-amber-600/30",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -168,7 +181,11 @@ export default function DashboardClient({ username }: { username: string }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const rankColor = data ? (RANK_COLORS[data.rank] || RANK_COLORS.Beginner) : RANK_COLORS.Beginner;
+  // Use rankName (e.g. "Rookie") for colour lookup, not full rank string with emoji
+  const rankColor = data
+    ? (RANK_COLORS[data.rankName] || RANK_COLORS.Rookie)
+    : RANK_COLORS.Rookie;
+
   const quizTotal = data ? data.quizWins + data.quizLosses : 0;
   const quizRate = quizTotal > 0 && data ? Math.round((data.quizWins / quizTotal) * 100) : 0;
 
@@ -211,10 +228,10 @@ export default function DashboardClient({ username }: { username: string }) {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`rank-badge border ${rankColor}`}>
-                    🏅 {data.rank}
+                    {data.rank}
                   </span>
                   <span className="text-gray-400 text-sm">
-                    Level {data.level}
+                    Tier {data.level}
                   </span>
                 </div>
               </div>
@@ -258,6 +275,24 @@ export default function DashboardClient({ username }: { username: string }) {
                   color="bg-orange-500/10"
                 />
               </div>
+
+              {/* Battle record */}
+              {(data.wins > 0 || data.losses > 0) && (
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <StatCard
+                    icon={<span className="text-xl">⚔️</span>}
+                    label="Battle Wins"
+                    value={data.wins}
+                    color="bg-green-500/10"
+                  />
+                  <StatCard
+                    icon={<span className="text-xl">💀</span>}
+                    label="Battle Losses"
+                    value={data.losses}
+                    color="bg-red-500/10"
+                  />
+                </div>
+              )}
 
               <div className="mb-8">
                 <div className="flex items-center gap-4 mb-4">
