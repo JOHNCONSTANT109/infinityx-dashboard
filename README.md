@@ -1,4 +1,4 @@
-# INFINITYX Dashboard
+# Deezbots Dashboard
 
 Your WhatsApp Pokémon Dashboard — a Next.js web app deployable on Vercel.
 
@@ -12,7 +12,7 @@ Your WhatsApp Pokémon Dashboard — a Next.js web app deployable on Vercel.
    git init
    git add .
    git commit -m "Initial commit"
-   git remote add origin https://github.com/yourname/infinityx-dashboard.git
+   git remote add origin https://github.com/yourname/deezbots-dashboard.git
    git push -u origin main
    ```
 
@@ -29,15 +29,15 @@ In Vercel → Project → Settings → Environment Variables, add:
 | Variable | Value |
 |----------|-------|
 | `MONGODB_URI` | Your bot's MongoDB connection string |
-| `MONGODB_DB` | Name of your bot's database (e.g. `infinityx`) |
+| `MONGODB_DB` | Name of your bot's database (e.g. `deezbots`) |
 | `SESSION_SECRET` | Any long random string (32+ characters) |
-| `WEBSITE_URL` | Your Vercel URL (e.g. `https://infinityx.vercel.app`) |
+| `DASHBOARD_URL` | Your Vercel URL (e.g. `https://deezbots.vercel.app`) |
 
 ### Step 4 — Add Bot Commands
 
-Copy the functions from `BOT_COMMANDS.js` into your bot's message handler.
+The bot commands are already integrated in `src/commands/dashboard.js`.
 
-Edit the `WEBSITE_URL` at the top of `BOT_COMMANDS.js` to match your Vercel URL.
+Set `DASHBOARD_URL` as an environment variable on your bot host so it always sends the correct link.
 
 ---
 
@@ -58,21 +58,20 @@ Edit the `WEBSITE_URL` at the top of `BOT_COMMANDS.js` to match your Vercel URL.
 
 ## 🗄️ Database Schema
 
-The dashboard reads from your existing MongoDB users collection. It looks for these fields (flexible — will work with multiple common field names):
+The dashboard reads from your existing MongoDB users collection. It looks for these fields:
 
 | Dashboard Feature | Field Names Checked |
 |------------------|---------------------|
 | Username | `name`, `username`, `pushName` |
-| Gold | `gold`, `coins`, `money`, `wallet` |
-| Bank | `bank`, `bankBalance` |
-| XP | `xp`, `exp`, `experience` |
-| Rank | `rank`, `tier`, `rankTier` |
-| Cards | `cards`, `cardCount`, `cardCollection` |
-| Quiz Wins | `quizWins`, `quiz.wins` |
-| Quiz Losses | `quizLosses`, `quiz.losses` |
-| Party | `party`, `team`, `activePokemon` |
-| PC Storage | `pc`, `box`, `storage`, `pcStorage` |
-| Total Catches | `totalCatches`, `catches` |
+| Gold | `economy.wallet` |
+| Bank | `economy.bank` |
+| XP | `xp` |
+| Rank | Calculated from XP tiers |
+| Cards | `cards` |
+| Quiz Wins | `quizWins` |
+| Party | `party` |
+| PC Storage | `pc` |
+| Total Catches | `catches` |
 
 If your bot uses different field names, edit `app/api/dashboard/route.ts` accordingly.
 
@@ -98,7 +97,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ## 📁 Project Structure
 
 ```
-infinityx-dashboard/
+deezbots-dashboard/
 ├── app/
 │   ├── page.tsx          # Landing page
 │   ├── login/            # Login page
@@ -115,10 +114,9 @@ infinityx-dashboard/
 ├── lib/
 │   ├── db.ts             # MongoDB connection
 │   └── session.ts        # iron-session auth
-├── BOT_COMMANDS.js       # Paste these into your bot
 └── .env.example          # Environment variable template
 ```
 
 ---
 
-© INFINITYX · All rights reserved · Deezbots in cooperation
+© Deezbots. All rights reserved.

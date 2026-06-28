@@ -152,7 +152,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-gray-600 text-xs mt-6">
-          © {new Date().getFullYear()} INFINITYX · All rights reserved · Deezbots in cooperation
+          © {new Date().getFullYear()} Deezbots. All rights reserved.
         </p>
       </div>
     </div>

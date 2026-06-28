@@ -55,7 +55,7 @@ export default async function HomePage() {
           <div className="relative z-10 max-w-4xl mx-auto animate-fade-in">
             <div className="inline-flex items-center gap-2 border border-[#2a2f45] bg-[#1a1f2e]/80 rounded-full px-4 py-1.5 text-xs text-gray-300 mb-8">
               <Zap className="w-3 h-3 text-[#ffd700]" />
-              Powered by DeezbBots
+              Powered by Deezbots
             </div>
 
             <h1 className="font-display font-black text-5xl sm:text-6xl md:text-7xl tracking-wider mb-6 animate-glow">

@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getSession } from "@/lib/session";
-import { Github, Code2, Zap, Star, Shield } from "lucide-react";
+import { Code2, Zap, Star } from "lucide-react";
 
 const TEAM = [
   {
@@ -10,7 +10,7 @@ const TEAM = [
     isOwner: true,
     avatar: "👑",
     description:
-      "Founder of DeezbBots and the creative force behind INFINITYX. Built the entire bot and dashboard from the ground up — from the Pokémon engine to the web platform.",
+      "Founder of Deezbots and the creative force behind the platform. Built the entire bot and dashboard from the ground up — from the Pokémon engine to the web platform.",
     skills: ["Bot Development", "Web Design", "Database Architecture", "Game Design"],
     badge: "🏆 Founder",
   },
@@ -28,13 +28,13 @@ export default async function TeamPage() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-[#1a1f2e] border border-[#2a2f45] rounded-full px-4 py-1.5 text-xs text-gray-400 mb-4">
               <Zap className="w-3 h-3 text-[#ffd700]" />
-              DeezbBots Team
+              Deezbots Team
             </div>
             <h1 className="font-display text-3xl sm:text-4xl font-bold gradient-text mb-3">
               The Team
             </h1>
             <p className="text-gray-400 max-w-xl mx-auto">
-              The people behind INFINITYX and the DeezbBots ecosystem
+              The people behind the Deezbots ecosystem
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export default async function TeamPage() {
                   <Zap className="w-5 h-5 text-[#00d4ff]" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold">INFINITYX Bot</h3>
+                  <h3 className="text-white font-semibold">Deezbots Bot</h3>
                   <p className="text-gray-500 text-xs">WhatsApp Pokémon Game</p>
                 </div>
               </div>
@@ -109,12 +109,12 @@ export default async function TeamPage() {
                   <Code2 className="w-5 h-5 text-[#ffd700]" />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold">DeezbBots</h3>
+                  <h3 className="text-white font-semibold">Deezbots</h3>
                   <p className="text-gray-500 text-xs">Bot Development Studio</p>
                 </div>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed">
-                The company behind INFINITYX and other WhatsApp bots. Focused on
+                The company behind Deezbots and other WhatsApp bots. Focused on
                 creating fun, engaging, and technically excellent bot experiences.
               </p>
             </div>
@@ -124,8 +124,8 @@ export default async function TeamPage() {
             <Star className="w-8 h-8 text-[#ffd700] mx-auto mb-4" />
             <h3 className="text-white font-bold text-xl mb-2">Join the Community</h3>
             <p className="text-gray-400 text-sm max-w-md mx-auto mb-6">
-              Play INFINITYX on WhatsApp, climb the leaderboards, and be part of the
-              growing DeezbBots community.
+              Play on WhatsApp, climb the leaderboards, and be part of the
+              growing Deezbots community.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a href="/login">
