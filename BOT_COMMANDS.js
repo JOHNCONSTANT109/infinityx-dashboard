@@ -1,38 +1,15 @@
-/**
- * INFINITYX Dashboard Bot Commands
- *
- * These are the ACTUAL commands used by the bot (src/commands/dashboard.js).
- * The bot uses SHA-256 password hashing and stores accounts in the
- * 'dashboard_accounts' MongoDB collection — NOT in the 'users' collection.
- *
- * Collection: dashboard_accounts
- *   _id          : phone number digits (e.g. "2348012345678")
- *   botKey       : canonical WhatsApp key from keyOf(sender)
- *   passwordHash : SHA-256 hex of (password + salt)
- *   passwordSalt : 16-byte hex random salt
- *   createdAt    : Date.now()
- *   updatedAt    : Date.now() (on password reset)
- *
- * Commands (default prefix is whatever CONFIG.PREFIX is set to):
- *   {PREFIX}webpass [password]          — set dashboard password
- *   {PREFIX}addnumber [phonenumber]     — link phone number & create account
- *   {PREFIX}webresetpassword [password] — change existing password
- *
- * Dashboard URL: set DASHBOARD_URL env var on the bot, or edit below.
- */
-
+// dashboard.js — web dashboard bot commands
 import { randomBytes, createHash } from 'node:crypto';
-import { mongo, keyOf } from '../src/lib/storage.js';
-import { CONFIG } from '../src/config.js';
+import { mongo, keyOf } from '../lib/storage.js';
+import { CONFIG } from '../config.js';
 
 const dashCol = mongo.collection('dashboard_accounts');
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://infinityx-dashboard.onrender.com';
+const DASHBOARD_URL = process.env.DASHBOARD_URL || 'https://deezbots.vercel.app';
 
 function hashPassword(password, salt) {
   return createHash('sha256').update(password + salt).digest('hex');
 }
 
-// ── webpass ─────────────────────────────────────────────────────────────────
 export async function webpassCommand({ sock, msg, sender, args }) {
   const chatId = msg.key.remoteJid;
   const password = args.join(' ').trim();
@@ -63,7 +40,6 @@ export async function webpassCommand({ sock, msg, sender, args }) {
   }, { quoted: msg });
 }
 
-// ── addnumber ────────────────────────────────────────────────────────────────
 export async function addnumberCommand({ sock, msg, sender, args }) {
   const chatId = msg.key.remoteJid;
   const number = (args[0] || '').replace(/\D/g, '');
@@ -110,7 +86,6 @@ export async function addnumberCommand({ sock, msg, sender, args }) {
   }, { quoted: msg });
 }
 
-// ── webresetpassword ─────────────────────────────────────────────────────────
 export async function webresetpasswordCommand({ sock, msg, sender, args }) {
   const chatId = msg.key.remoteJid;
   const password = args.join(' ').trim();
