@@ -1,0 +1,79 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "crypto";
+import { getDb } from "@/lib/db";
+import { getSession } from "@/lib/session";
+
+function hashPassword(password: string, salt: string): string {
+  return createHash("sha256").update(password + salt).digest("hex");
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const { number, password } = await req.json();
+
+    if (!number || !password) {
+      return NextResponse.json(
+        { error: "Number and password are required" },
+        { status: 400 }
+      );
+    }
+
+    const cleanNumber = number.toString().replace(/\D/g, "");
+
+    const db = await getDb();
+
+    // The bot stores dashboard accounts in 'dashboard_accounts' collection
+    // _id = phone number digits, botKey = canonical user key
+    const dashAccount = await db
+      .collection("dashboard_accounts")
+      .findOne({ _id: cleanNumber });
+
+    if (!dashAccount) {
+      return NextResponse.json(
+        { error: "No dashboard account found. Use -addnumber in the bot first." },
+        { status: 404 }
+      );
+    }
+
+    if (!dashAccount.passwordHash || !dashAccount.passwordSalt) {
+      return NextResponse.json(
+        { error: "No password set. Use -webpass in the bot first." },
+        { status: 401 }
+      );
+    }
+
+    // Verify password using SHA256 + salt (same as the bot)
+    const hash = hashPassword(password, dashAccount.passwordSalt);
+    if (hash !== dashAccount.passwordHash) {
+      return NextResponse.json(
+        { error: "Incorrect password" },
+        { status: 401 }
+      );
+    }
+
+    // Fetch username from users collection using botKey
+    const botKey = dashAccount.botKey || cleanNumber;
+    const userDoc = await db
+      .collection("users")
+      .findOne({ _id: botKey });
+
+    const username =
+      userDoc?.name ||
+      `Player_${cleanNumber.slice(-4)}`;
+
+    const session = await getSession();
+    session.isLoggedIn = true;
+    session.number = cleanNumber;
+    session.botKey = botKey;
+    session.username = username;
+    await session.save();
+
+    return NextResponse.json({ success: true, username });
+  } catch (err) {
+    console.error("Login error:", err);
+    return NextResponse.json(
+      { error: "Server error. Please try again." },
+      { status: 500 }
+    );
+  }
+}
