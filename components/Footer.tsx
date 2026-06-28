@@ -10,7 +10,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-3">
               <Zap className="w-5 h-5 text-[#ffd700]" />
               <span className="font-display font-bold text-lg gradient-text tracking-wider">
-                INFINITYX
+                DEEZBOTS
               </span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
@@ -88,8 +88,7 @@ export default function Footer() {
 
         <div className="border-t border-[#2a2f45] mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p className="text-gray-500 text-xs">
-            © {new Date().getFullYear()} INFINITYX. All rights reserved.{" "}
-            <span className="text-gray-400">Deezbots in cooperation.</span>
+            © {new Date().getFullYear()} Deezbots. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5 text-xs text-gray-500">
             <Zap className="w-3 h-3 text-[#ffd700]" />
