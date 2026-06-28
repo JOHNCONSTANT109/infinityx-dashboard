@@ -16,6 +16,10 @@ import { NextResponse } from "next/server";
     wins?: number;
     losses?: number;
     badges?: number;
+    profilePic?: string;
+    profilePicture?: string;
+    avatar?: string;
+    pfp?: string;
   }
 
   interface EconomyDoc {
@@ -74,9 +78,13 @@ import { NextResponse } from "next/server";
       const xp: number = user.xp || 0;
       const tier = getRankTier(xp);
 
+      // Try multiple common field names for the profile picture
+      const profilePic = user.profilePic || user.profilePicture || user.avatar || user.pfp || null;
+
       return NextResponse.json({
         username: user.name || session.username || ("Player_" + (session.number || "").slice(-4)),
         number: session.number,
+        profilePic,
         party: user.party || [],
         pc: user.pc || [],
         gold: economy?.wallet || 0,
