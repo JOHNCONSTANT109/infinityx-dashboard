@@ -31,24 +31,20 @@ export default function Navbar({ isLoggedIn, username }: NavbarProps) {
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
-            <Link
-              href="/leaderboard"
-              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
-            >
+            <Link href="/leaderboard" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">
               Leaderboard
             </Link>
-            <Link
-              href="/team"
-              className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
-            >
+            <Link href="/team" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">
               Team
             </Link>
+            {isLoggedIn && (
+              <Link href="/slots" className="text-gray-300 hover:text-[#ffd700] text-sm font-medium transition-colors">
+                🎰 Slots
+              </Link>
+            )}
             {isLoggedIn ? (
               <div className="flex items-center gap-3">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-300 hover:text-[#00d4ff] text-sm font-medium transition-colors"
-                >
+                <Link href="/dashboard" className="text-gray-300 hover:text-[#00d4ff] text-sm font-medium transition-colors">
                   {username || "Dashboard"}
                 </Link>
                 <button
@@ -77,33 +73,23 @@ export default function Navbar({ isLoggedIn, username }: NavbarProps) {
 
       {menuOpen && (
         <div className="md:hidden border-t border-[#2a2f45] bg-[#0d0f1a]/95 px-4 py-4 flex flex-col gap-4">
-          <Link
-            href="/leaderboard"
-            className="text-gray-300 hover:text-white text-sm font-medium"
-            onClick={() => setMenuOpen(false)}
-          >
+          <Link href="/leaderboard" className="text-gray-300 hover:text-white text-sm font-medium" onClick={() => setMenuOpen(false)}>
             Leaderboard
           </Link>
-          <Link
-            href="/team"
-            className="text-gray-300 hover:text-white text-sm font-medium"
-            onClick={() => setMenuOpen(false)}
-          >
+          <Link href="/team" className="text-gray-300 hover:text-white text-sm font-medium" onClick={() => setMenuOpen(false)}>
             Team
           </Link>
+          {isLoggedIn && (
+            <Link href="/slots" className="text-gray-300 hover:text-[#ffd700] text-sm font-medium" onClick={() => setMenuOpen(false)}>
+              🎰 Slots
+            </Link>
+          )}
           {isLoggedIn ? (
             <>
-              <Link
-                href="/dashboard"
-                className="text-gray-300 hover:text-[#00d4ff] text-sm font-medium"
-                onClick={() => setMenuOpen(false)}
-              >
+              <Link href="/dashboard" className="text-gray-300 hover:text-[#00d4ff] text-sm font-medium" onClick={() => setMenuOpen(false)}>
                 Dashboard
               </Link>
-              <button
-                onClick={handleLogout}
-                className="text-left text-sm text-red-400 hover:text-red-300 font-medium"
-              >
+              <button onClick={handleLogout} className="text-left text-sm text-red-400 hover:text-red-300 font-medium">
                 Logout
               </button>
             </>

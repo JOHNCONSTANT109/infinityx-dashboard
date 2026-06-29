@@ -52,9 +52,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white mb-2">Welcome back, Trainer</h1>
-          <p className="text-gray-400 text-sm">
-            Sign in to access your dashboard
-          </p>
+          <p className="text-gray-400 text-sm">Sign in to access your dashboard</p>
         </div>
 
         <div className="glass-card p-8">
@@ -70,14 +68,14 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Phone Number
               </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <div className="flex items-center gap-2 bg-[rgba(26,31,46,0.8)] border border-[#2a2f45] rounded-lg px-3 focus-within:border-[#00d4ff] focus-within:shadow-[0_0_0_3px_rgba(0,212,255,0.1)] transition-all">
+                <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 <input
                   type="tel"
                   value={number}
                   onChange={(e) => setNumber(e.target.value)}
                   placeholder="27XXXXXXXXX (no + or spaces)"
-                  className="pl-10"
+                  style={{ background: "transparent", border: "none", boxShadow: "none", padding: "0.75rem 0" }}
                   required
                 />
               </div>
@@ -90,20 +88,20 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Password
               </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <div className="flex items-center gap-2 bg-[rgba(26,31,46,0.8)] border border-[#2a2f45] rounded-lg px-3 focus-within:border-[#00d4ff] focus-within:shadow-[0_0_0_3px_rgba(0,212,255,0.1)] transition-all">
+                <Lock className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 <input
                   type={showPass ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Your web password"
-                  className="pl-10 pr-10"
+                  style={{ background: "transparent", border: "none", boxShadow: "none", padding: "0.75rem 0", flex: 1 }}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300"
+                  className="text-gray-500 hover:text-gray-300 flex-shrink-0"
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -128,9 +126,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-6 glass-card p-5">
-          <p className="text-sm font-medium text-gray-300 mb-3">
-            First time? Set up via the bot:
-          </p>
+          <p className="text-sm font-medium text-gray-300 mb-3">First time? Set up via the bot:</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-gray-500 text-xs w-4">1.</span>

@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
-import LeaderboardClient from "./LeaderboardClient";
+import SlotsClient from "./SlotsClient";
 
 export const dynamic = "force-dynamic";
 
-export default async function LeaderboardPage() {
+export default async function SlotsPage() {
   const session = await getSession();
   if (!session.isLoggedIn) {
     redirect("/login");
   }
-  return <LeaderboardClient isLoggedIn username={session.username} />;
+  return <SlotsClient username={session.username || "Trainer"} />;
 }

@@ -1,0 +1,301 @@
+"use client";
+import { useState, useRef } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+const SYMBOLS = ["🍒", "🍋", "🍊", "🍇", "💎", "⭐", "7️⃣"];
+const PAYOUTS: Record<string, number> = {
+  "7️⃣": 50, "⭐": 20, "💎": 10, "🍇": 5, "🍊": 3, "🍋": 2, "🍒": 1.5,
+};
+
+const QUICK_BETS = [10000, 100000, 500000, 1000000];
+
+function formatGold(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2).replace(/\.?0+$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.?0+$/, "") + "K";
+  return n.toLocaleString();
+}
+
+interface ReelProps {
+  symbol: string;
+  spinning: boolean;
+  delay: number;
+}
+
+function Reel({ symbol, spinning, delay }: ReelProps) {
+  return (
+    <div
+      className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 flex items-center justify-center overflow-hidden"
+      style={{
+        background: "rgba(13,15,26,0.9)",
+        borderColor: spinning ? "#00d4ff" : "#2a2f45",
+        boxShadow: spinning ? "0 0 20px rgba(0,212,255,0.4)" : "none",
+        transition: "border-color 0.3s, box-shadow 0.3s",
+      }}
+    >
+      <span
+        className="text-5xl select-none"
+        style={{
+          display: "inline-block",
+          animation: spinning ? `spin-reel 0.1s linear infinite` : "none",
+          animationDelay: `${delay}ms`,
+          filter: spinning ? "blur(1px)" : "none",
+          transition: "filter 0.2s",
+        }}
+      >
+        {spinning ? SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)] : symbol}
+      </span>
+    </div>
+  );
+}
+
+export default function SlotsClient({ username }: { username: string }) {
+  const [reels, setReels] = useState(["🍒", "🍒", "🍒"]);
+  const [spinning, setSpinning] = useState(false);
+  const [bet, setBet] = useState(10000);
+  const [wallet, setWallet] = useState<number | null>(null);
+  const [result, setResult] = useState<{ won: boolean; winAmount: number; message: string } | null>(null);
+  const [error, setError] = useState("");
+  const [loadingWallet, setLoadingWallet] = useState(true);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [displayReels, setDisplayReels] = useState(["🍒", "🍒", "🍒"]);
+
+  // Fetch wallet on mount
+  useState(() => {
+    fetch("/api/dashboard")
+      .then((r) => r.json())
+      .then((d) => { if (d.gold !== undefined) setWallet(d.gold); })
+      .catch(() => {})
+      .finally(() => setLoadingWallet(false));
+  });
+
+  async function spin() {
+    if (spinning) return;
+    if (bet < 1 || bet > 1_000_000) { setError("Bet must be between 1 and 1,000,000 gold."); return; }
+    if (wallet !== null && bet > wallet) { setError("Not enough gold in your wallet!"); return; }
+    setError("");
+    setResult(null);
+    setSpinning(true);
+
+    // Animate reels randomly while waiting
+    intervalRef.current = setInterval(() => {
+      setDisplayReels([
+        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+        SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+      ]);
+    }, 80);
+
+    try {
+      const res = await fetch("/api/slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bet }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Spin failed"); return; }
+
+      // Stop animation and show result
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setDisplayReels(data.reels);
+      setReels(data.reels);
+      setWallet(data.newWallet);
+      setResult({ won: data.won, winAmount: data.winAmount, message: data.message });
+    } catch {
+      setError("Connection error. Try again.");
+    } finally {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setSpinning(false);
+    }
+  }
+
+  const isWin = result?.won;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar isLoggedIn username={username} />
+
+      <style>{`
+        @keyframes spin-reel {
+          0% { transform: translateY(-100%); opacity: 0; }
+          50% { opacity: 1; }
+          100% { transform: translateY(100%); opacity: 0; }
+        }
+        @keyframes glow-win {
+          0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+          50% { box-shadow: 0 0 40px rgba(255,215,0,0.8); }
+        }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
+        }
+      `}</style>
+
+      <main className="flex-1 pt-24 pb-12 px-4">
+        <div className="max-w-lg mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-[#1a1f2e] border border-[#2a2f45] rounded-full px-4 py-1.5 text-xs text-gray-400 mb-4">
+              🎰 Casino
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl font-bold gradient-text mb-2">
+              Slot Machine
+            </h1>
+            <p className="text-gray-400 text-sm">Max bet: 1,000,000 gold · Jackpot: 7️⃣7️⃣7️⃣ = 50x</p>
+          </div>
+
+          {/* Machine body */}
+          <div
+            className="glass-card p-6 mb-4"
+            style={{ border: "1px solid #2a2f45" }}
+          >
+            {/* Wallet display */}
+            <div className="flex items-center justify-between mb-5 bg-[#0d0f1a] rounded-xl px-4 py-3 border border-[#2a2f45]">
+              <span className="text-gray-400 text-sm">💰 Your Wallet</span>
+              <span className="text-white font-bold text-lg">
+                {loadingWallet ? "..." : wallet !== null ? wallet.toLocaleString() + " gold" : "—"}
+              </span>
+            </div>
+
+            {/* Reels */}
+            <div
+              className="flex justify-center gap-3 mb-6 p-4 rounded-2xl"
+              style={{
+                background: "linear-gradient(135deg, #0a0c15 0%, #0d0f1a 100%)",
+                border: "2px solid #2a2f45",
+                animation: isWin ? "glow-win 1s ease-in-out 3" : "none",
+              }}
+            >
+              {(spinning ? displayReels : reels).map((sym, i) => (
+                <div
+                  key={i}
+                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 flex items-center justify-center"
+                  style={{
+                    background: "rgba(13,15,26,0.9)",
+                    borderColor: spinning ? "#00d4ff" : (isWin ? "#ffd700" : "#2a2f45"),
+                    boxShadow: spinning ? "0 0 20px rgba(0,212,255,0.3)" : (isWin ? "0 0 20px rgba(255,215,0,0.3)" : "none"),
+                    transition: "all 0.3s",
+                    animation: spinning ? `shake 0.1s infinite` : "none",
+                    animationDelay: `${i * 50}ms`,
+                  }}
+                >
+                  <span className="text-5xl select-none">{sym}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Result banner */}
+            {result && (
+              <div
+                className={`rounded-xl p-4 mb-5 text-center border ${
+                  isWin
+                    ? "bg-yellow-500/10 border-yellow-500/40 text-yellow-300"
+                    : "bg-red-500/10 border-red-500/30 text-red-300"
+                }`}
+              >
+                <p className="font-bold text-lg">{result.message}</p>
+                {isWin && (
+                  <p className="text-sm mt-1 text-yellow-400">
+                    +{result.winAmount.toLocaleString()} gold added to wallet!
+                  </p>
+                )}
+              </div>
+            )}
+
+            {error && (
+              <div className="rounded-xl p-3 mb-5 text-center bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Bet controls */}
+            <div className="space-y-3">
+              <div>
+                <label className="text-gray-400 text-xs uppercase tracking-wider mb-2 block">Bet Amount</label>
+                <div className="flex items-center gap-2 bg-[#0d0f1a] border border-[#2a2f45] rounded-xl px-4 py-3 focus-within:border-[#00d4ff] transition-colors">
+                  <span className="text-yellow-400 text-sm font-bold">💰</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={1000000}
+                    value={bet}
+                    onChange={(e) => setBet(Math.min(1000000, Math.max(1, parseInt(e.target.value) || 1)))}
+                    style={{ background: "transparent", border: "none", boxShadow: "none", padding: 0, color: "white", fontWeight: "bold", fontSize: "1rem" }}
+                    disabled={spinning}
+                  />
+                  <span className="text-gray-500 text-xs ml-auto">max 1M</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                {QUICK_BETS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => setBet(q)}
+                    disabled={spinning}
+                    className={`py-2 rounded-lg text-xs font-semibold transition-all border ${
+                      bet === q
+                        ? "bg-[#00d4ff] text-[#0d0f1a] border-[#00d4ff]"
+                        : "bg-[#1a1f2e] text-gray-300 border-[#2a2f45] hover:border-[#00d4ff]/40"
+                    }`}
+                  >
+                    {formatGold(q)}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={spin}
+                disabled={spinning}
+                className="w-full py-4 rounded-xl font-bold text-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+                style={{
+                  background: spinning
+                    ? "rgba(26,31,46,0.8)"
+                    : "linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)",
+                  color: spinning ? "white" : "#0d0f1a",
+                  boxShadow: spinning ? "none" : "0 4px 20px rgba(255,215,0,0.4)",
+                  border: "none",
+                }}
+              >
+                {spinning ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Spinning...
+                  </>
+                ) : (
+                  <>🎰 SPIN — {formatGold(bet)} gold</>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Pay table */}
+          <div className="glass-card p-5">
+            <p className="text-gray-400 text-xs uppercase tracking-wider mb-3">Pay Table (3 matching)</p>
+            <div className="space-y-2">
+              {Object.entries(PAYOUTS).map(([sym, mult]) => (
+                <div key={sym} className="flex items-center justify-between">
+                  <span className="text-xl">{sym} {sym} {sym}</span>
+                  <span className={`font-bold text-sm ${mult >= 20 ? "text-yellow-400" : mult >= 5 ? "text-[#00d4ff]" : "text-gray-300"}`}>
+                    {mult}× bet
+                  </span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between border-t border-[#2a2f45] pt-2 mt-2">
+                <span className="text-gray-500 text-sm">2 matching</span>
+                <span className="text-gray-400 text-sm font-semibold">break even</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-500 text-sm">no match</span>
+                <span className="text-red-400 text-sm font-semibold">lose bet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}

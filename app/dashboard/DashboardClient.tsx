@@ -1,396 +1,606 @@
 "use client";
-  import { useEffect, useState } from "react";
-  import Navbar from "@/components/Navbar";
-  import Footer from "@/components/Footer";
-  import { TrendingUp, Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { TrendingUp, Loader2, X } from "lucide-react";
 
-  interface PokemonMove {
-    name?: string;
-    pp?: number;
-    maxPp?: number;
-    type?: string;
-    power?: number;
-    category?: string;
-  }
+interface PokemonMove {
+  name?: string;
+  pp?: number;
+  maxPp?: number;
+  type?: string;
+  power?: number;
+  category?: string;
+}
 
-  interface Pokemon {
-    name?: string;
-    species?: string;
-    level?: number;
-    hp?: number;
-    maxHp?: number;
-    xp?: number;
-    type?: string;
-    types?: string[];
-    rarity?: string;
-    shiny?: boolean;
-    iv?: number;
-    sprite?: string;
-    description?: string;
-    moves?: PokemonMove[];
-    stats?: {
-      attack?: number;
-      defense?: number;
-      spAtk?: number;
-      spDef?: number;
-      speed?: number;
-    };
-  }
-
-  interface DashboardData {
-    username: string;
-    number: string;
-    profilePic?: string;
-    party: Pokemon[];
-    pc: Pokemon[];
-    gold: number;
-    bank: number;
-    xp: number;
-    rank: string;
-    rankName: string;
-    level: number;
-    badges: number;
-    cards: number;
-    quizWins: number;
-    quizLosses: number;
-    totalCatches: number;
-    wins: number;
-    losses: number;
-  }
-
-  const RANK_COLORS: Record<string, string> = {
-    Rookie:         "bg-gray-500/20 text-gray-400 border-gray-500/30",
-    Trainer:        "bg-orange-900/20 text-orange-400 border-orange-700/30",
-    Veteran:        "bg-slate-400/20 text-slate-300 border-slate-400/30",
-    Expert:         "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    Elite:          "bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
-    Ace:            "bg-blue-500/20 text-blue-300 border-blue-400/30",
-    Master:         "bg-purple-600/20 text-purple-300 border-purple-500/30",
-    Champion:       "bg-red-500/20 text-red-300 border-red-500/30",
-    Legend:         "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    "Mythical I":   "bg-indigo-500/20 text-indigo-300 border-indigo-400/30",
-    "Mythical II":  "bg-indigo-600/20 text-indigo-400 border-indigo-500/30",
-    "Mythical III": "bg-indigo-700/20 text-indigo-500 border-indigo-600/30",
-    "Hero I":       "bg-pink-500/20 text-pink-300 border-pink-400/30",
-    "Hero II":      "bg-pink-600/20 text-pink-400 border-pink-500/30",
-    "Hero III":     "bg-pink-700/20 text-pink-500 border-pink-600/30",
-    "Divine I":     "bg-violet-500/20 text-violet-300 border-violet-400/30",
-    "Divine II":    "bg-violet-700/20 text-violet-500 border-violet-600/30",
-    "Deity I":      "bg-amber-500/20 text-amber-300 border-amber-400/30",
-    "Deity II":     "bg-amber-700/20 text-amber-500 border-amber-600/30",
+interface Pokemon {
+  name?: string;
+  species?: string;
+  level?: number;
+  hp?: number;
+  maxHp?: number;
+  xp?: number;
+  type?: string;
+  types?: string[];
+  rarity?: string;
+  shiny?: boolean;
+  iv?: number;
+  sprite?: string;
+  description?: string;
+  moves?: PokemonMove[];
+  stats?: {
+    attack?: number;
+    defense?: number;
+    spAtk?: number;
+    spDef?: number;
+    speed?: number;
   };
+}
 
-  const TYPE_COLORS: Record<string, string> = {
-    fire: "bg-orange-500/20 text-orange-300",
-    water: "bg-blue-500/20 text-blue-300",
-    grass: "bg-green-500/20 text-green-300",
-    electric: "bg-yellow-500/20 text-yellow-300",
-    psychic: "bg-pink-500/20 text-pink-300",
-    dark: "bg-gray-700/40 text-gray-300",
-    steel: "bg-slate-500/20 text-slate-300",
-    dragon: "bg-indigo-500/20 text-indigo-300",
-    fairy: "bg-pink-400/20 text-pink-200",
-    normal: "bg-gray-500/20 text-gray-300",
-    fighting: "bg-red-700/20 text-red-300",
-    flying: "bg-sky-400/20 text-sky-200",
-    poison: "bg-purple-500/20 text-purple-300",
-    ground: "bg-amber-600/20 text-amber-300",
-    rock: "bg-yellow-700/20 text-yellow-600",
-    bug: "bg-lime-500/20 text-lime-300",
-    ghost: "bg-violet-700/20 text-violet-300",
-    ice: "bg-cyan-400/20 text-cyan-200",
-  };
+interface DashboardData {
+  username: string;
+  number: string;
+  profilePic?: string;
+  party: Pokemon[];
+  pc: Pokemon[];
+  gold: number;
+  bank: number;
+  xp: number;
+  rank: string;
+  rankName: string;
+  level: number;
+  badges: number;
+  cards: number;
+  quizWins: number;
+  quizLosses: number;
+  totalCatches: number;
+  wins: number;
+  losses: number;
+}
 
-  function PokemonModal({ pokemon, onClose }: { pokemon: Pokemon; onClose: () => void }) {
-    const name = pokemon.name || pokemon.species || "Unknown";
-    const level = pokemon.level || 1;
-    const types = pokemon.types || (pokemon.type ? [pokemon.type] : ["normal"]);
-    const hpPercent = pokemon.maxHp ? Math.round(((pokemon.hp || 0) / pokemon.maxHp) * 100) : 100;
+const RANK_COLORS: Record<string, string> = {
+  Rookie:         "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  Trainer:        "bg-orange-900/20 text-orange-400 border-orange-700/30",
+  Veteran:        "bg-slate-400/20 text-slate-300 border-slate-400/30",
+  Expert:         "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  Elite:          "bg-cyan-500/20 text-cyan-300 border-cyan-400/30",
+  Ace:            "bg-blue-500/20 text-blue-300 border-blue-400/30",
+  Master:         "bg-purple-600/20 text-purple-300 border-purple-500/30",
+  Champion:       "bg-red-500/20 text-red-300 border-red-500/30",
+  Legend:         "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  "Mythical I":   "bg-indigo-500/20 text-indigo-300 border-indigo-400/30",
+  "Mythical II":  "bg-indigo-600/20 text-indigo-400 border-indigo-500/30",
+  "Mythical III": "bg-indigo-700/20 text-indigo-500 border-indigo-600/30",
+  "Hero I":       "bg-pink-500/20 text-pink-300 border-pink-400/30",
+  "Hero II":      "bg-pink-600/20 text-pink-400 border-pink-500/30",
+  "Hero III":     "bg-pink-700/20 text-pink-500 border-pink-600/30",
+  "Divine I":     "bg-violet-500/20 text-violet-300 border-violet-400/30",
+  "Divine II":    "bg-violet-700/20 text-violet-500 border-violet-600/30",
+  "Deity I":      "bg-amber-500/20 text-amber-300 border-amber-400/30",
+  "Deity II":     "bg-amber-700/20 text-amber-500 border-amber-600/30",
+};
 
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
-        <div className="bg-[#0d0f1a] border border-[#2a2f45] rounded-2xl max-w-sm w-full p-6 relative" onClick={e => e.stopPropagation()}>
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white">
-            <X className="w-5 h-5" />
-          </button>
+const TYPE_COLORS: Record<string, string> = {
+  fire: "bg-orange-500/20 text-orange-300",
+  water: "bg-blue-500/20 text-blue-300",
+  grass: "bg-green-500/20 text-green-300",
+  electric: "bg-yellow-500/20 text-yellow-300",
+  psychic: "bg-pink-500/20 text-pink-300",
+  dark: "bg-gray-700/40 text-gray-300",
+  steel: "bg-slate-500/20 text-slate-300",
+  dragon: "bg-indigo-500/20 text-indigo-300",
+  fairy: "bg-pink-400/20 text-pink-200",
+  normal: "bg-gray-500/20 text-gray-300",
+  fighting: "bg-red-700/20 text-red-300",
+  flying: "bg-sky-400/20 text-sky-200",
+  poison: "bg-purple-500/20 text-purple-300",
+  ground: "bg-amber-600/20 text-amber-300",
+  rock: "bg-yellow-700/20 text-yellow-600",
+  bug: "bg-lime-500/20 text-lime-300",
+  ghost: "bg-violet-700/20 text-violet-300",
+  ice: "bg-cyan-400/20 text-cyan-200",
+};
 
-          <div className="text-center mb-5">
-            <div className="w-24 h-24 mx-auto mb-3 bg-[#1a1f2e] rounded-full border border-[#2a2f45] flex items-center justify-center">
-              {pokemon.sprite
-                ? <img src={pokemon.sprite} alt={name} className="w-20 h-20 object-contain" />
-                : <span className="text-5xl">🔮</span>}
+function PokemonModal({ pokemon, onClose }: { pokemon: Pokemon; onClose: () => void }) {
+  const name = pokemon.name || pokemon.species || "Unknown";
+  const level = pokemon.level || 1;
+  const types = pokemon.types || (pokemon.type ? [pokemon.type] : ["normal"]);
+  const hpPercent = pokemon.maxHp ? Math.round(((pokemon.hp || 0) / pokemon.maxHp) * 100) : 100;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#0d0f1a] border border-[#2a2f45] rounded-2xl max-w-sm w-full p-6 relative overflow-y-auto max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+          <X className="w-5 h-5" />
+        </button>
+
+        <div className="text-center mb-5">
+          <div className="w-24 h-24 mx-auto mb-3 bg-[#1a1f2e] rounded-full border border-[#2a2f45] flex items-center justify-center">
+            {pokemon.sprite
+              ? <img src={pokemon.sprite} alt={name} className="w-20 h-20 object-contain" />
+              : <span className="text-5xl">🔮</span>}
+          </div>
+          <h2 className="text-xl font-bold text-white capitalize flex items-center justify-center gap-2">
+            {name}
+            {pokemon.shiny && <span className="text-yellow-400 text-sm">✨ Shiny</span>}
+          </h2>
+          <p className="text-gray-400 text-sm">Level {level} · {pokemon.rarity || "Common"}</p>
+          <div className="flex gap-2 justify-center mt-2">
+            {types.map((t) => (
+              <span
+                key={t}
+                className={`text-xs px-2 py-0.5 rounded-full capitalize ${TYPE_COLORS[t.toLowerCase()] || "bg-gray-500/20 text-gray-300"}`}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {pokemon.description && (
+          <p className="text-gray-400 text-xs text-center mb-4 italic">"{pokemon.description}"</p>
+        )}
+
+        <div className="space-y-2 mb-4">
+          <div>
+            <div className="flex justify-between text-xs text-gray-400 mb-1">
+              <span>HP</span>
+              <span>{pokemon.hp ?? "?"}/{pokemon.maxHp ?? "?"}</span>
             </div>
-            <h2 className="text-xl font-bold text-white capitalize flex items-center justify-center gap-2">
-              {name} {pokemon.shiny && <span className="text-yellow-400 text-sm">✨ Shiny</span>}
-            </h2>
-            <p className="text-gray-400 text-sm">Level {level} · {pokemon.rarity || "Common"}</p>
-            <div className="flex gap-2 justify-center mt-2">
-              {types.map(t => (
-                <span key={t} className={`text-xs px-2 py-0.5 rounded-full capitalize ${TYPE_COLORS[t.toLowerCase()] || "bg-gray-500/20 text-gray-300"}`}>{t}</span>
-              ))}
+            <div className="h-2 bg-[#1a1f2e] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${hpPercent}%`,
+                  background: hpPercent > 50 ? "#00d4ff" : hpPercent > 25 ? "#ffd700" : "#ef4444",
+                }}
+              />
             </div>
           </div>
-
-          {pokemon.description && (
-            <p className="text-gray-400 text-xs text-center mb-4 italic">"{pokemon.description}"</p>
+          {pokemon.xp !== undefined && (
+            <p className="text-xs text-gray-500 text-right">XP: {pokemon.xp.toLocaleString()}</p>
           )}
+        </div>
 
-          <div className="space-y-2 mb-4">
-            <div>
-              <div className="flex justify-between text-xs text-gray-400 mb-1">
-                <span>HP</span>
-                <span>{pokemon.hp ?? "?"}/{pokemon.maxHp ?? "?"}</span>
-              </div>
-              <div className="h-2 bg-[#1a1f2e] rounded-full overflow-hidden">
-                <div className="h-full rounded-full transition-all" style={{ width: `${hpPercent}%`, background: hpPercent > 50 ? "#00d4ff" : hpPercent > 25 ? "#ffd700" : "#ef4444" }} />
-              </div>
-            </div>
-            {pokemon.xp !== undefined && (
-              <p className="text-xs text-gray-500 text-right">XP: {pokemon.xp.toLocaleString()}</p>
-            )}
-          </div>
-
-          {pokemon.stats && (
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {[
-                ["Attack",   pokemon.stats.attack],
-                ["Defense",  pokemon.stats.defense],
-                ["Sp. Atk",  pokemon.stats.spAtk],
-                ["Sp. Def",  pokemon.stats.spDef],
-                ["Speed",    pokemon.stats.speed],
-              ].filter(([, v]) => v !== undefined).map(([label, val]) => (
-                <div key={String(label)} className="bg-[#1a1f2e] rounded-lg px-3 py-2 flex justify-between text-xs">
+        {pokemon.stats && (
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {([
+              ["Attack",  pokemon.stats.attack],
+              ["Defense", pokemon.stats.defense],
+              ["Sp. Atk", pokemon.stats.spAtk],
+              ["Sp. Def", pokemon.stats.spDef],
+              ["Speed",   pokemon.stats.speed],
+            ] as [string, number | undefined][])
+              .filter(([, v]) => v !== undefined)
+              .map(([label, val]) => (
+                <div key={label} className="bg-[#1a1f2e] rounded-lg px-3 py-2 flex justify-between text-xs">
                   <span className="text-gray-400">{label}</span>
                   <span className="text-white font-semibold">{val}</span>
                 </div>
               ))}
-            </div>
-          )}
-
-          {pokemon.moves && pokemon.moves.length > 0 && (
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Moves</p>
-              <div className="grid grid-cols-2 gap-2">
-                {pokemon.moves.slice(0, 4).map((m, i) => (
-                  <div key={i} className="bg-[#1a1f2e] rounded-lg px-3 py-2 text-xs">
-                    <p className="text-white font-medium capitalize">{m.name || "—"}</p>
-                    <p className="text-gray-500">{m.type || ""} {m.power ? `· ${m.power} pwr` : ""}</p>
-                    {m.pp !== undefined && <p className="text-gray-600">PP {m.pp}/{m.maxPp ?? m.pp}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  function PokemonCard({ pokemon, slot, onClick }: { pokemon: Pokemon; slot: number; onClick?: () => void }) {
-    const name = pokemon.name || pokemon.species || `Pokémon #${slot + 1}`;
-    const level = pokemon.level || 1;
-    const type = (pokemon.types?.[0] || pokemon.type || "normal").toLowerCase();
-    const typeColor = TYPE_COLORS[type] || "bg-gray-500/20 text-gray-300";
-    const hpPercent = pokemon.maxHp ? Math.round(((pokemon.hp || 0) / pokemon.maxHp) * 100) : 100;
-
-    return (
-      <div className="pokemon-card p-4 relative overflow-hidden cursor-pointer hover:border-[#00d4ff]/50 transition-all" onClick={onClick}>
-        {pokemon.shiny && <div className="absolute top-2 right-2 text-xs text-yellow-400 font-bold">✨</div>}
-        <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-lg bg-[#0d0f1a] flex items-center justify-center text-2xl flex-shrink-0 border border-[#2a2f45]">
-            {pokemon.sprite
-              ? <img src={pokemon.sprite} alt={name} className="w-10 h-10 object-contain" />
-              : "🔮"}
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-white font-semibold text-sm capitalize truncate mb-1">{name}</h4>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-gray-400 text-xs">Lv.{level}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${typeColor}`}>{type}</span>
-            </div>
-            {pokemon.maxHp && (
-              <div>
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>HP</span><span>{pokemon.hp}/{pokemon.maxHp}</span>
-                </div>
-                <div className="stat-bar">
-                  <div className="stat-bar-fill" style={{ width: `${hpPercent}%`, background: hpPercent > 50 ? "#00d4ff" : hpPercent > 25 ? "#ffd700" : "#ef4444" }} />
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  function StatCard({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: string | number; sub?: string; color: string; }) {
-    return (
-      <div className="glass-card p-4 card-glow">
-        <div className={`w-9 h-9 rounded-lg ${color} flex items-center justify-center mb-3`}>{icon}</div>
-        <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">{label}</p>
-        <p className="text-white font-bold text-xl leading-tight break-all">
-          {typeof value === "number" ? value.toLocaleString() : value}
-        </p>
-        {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
-      </div>
-    );
-  }
-
-  export default function DashboardClient({ username }: { username: string }) {
-    const [data, setData] = useState<DashboardData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [activeTab, setActiveTab] = useState<"party" | "pc">("party");
-    const [pcPage, setPcPage] = useState(0);
-    const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
-    const PC_PER_PAGE = 18;
-
-    useEffect(() => {
-      fetch("/api/dashboard")
-        .then((r) => r.json())
-        .then((d) => { if (d.error) setError(d.error); else setData(d); })
-        .catch(() => setError("Failed to load data"))
-        .finally(() => setLoading(false));
-    }, []);
-
-    const rankColor = data ? (RANK_COLORS[data.rankName] || RANK_COLORS.Rookie) : RANK_COLORS.Rookie;
-    const quizTotal = data ? data.quizWins + data.quizLosses : 0;
-    const quizRate = quizTotal > 0 && data ? Math.round((data.quizWins / quizTotal) * 100) : 0;
-    const pcSlice = data ? data.pc.slice(pcPage * PC_PER_PAGE, (pcPage + 1) * PC_PER_PAGE) : [];
-    const pcPages = data ? Math.ceil(data.pc.length / PC_PER_PAGE) : 0;
-    const totalGold = data ? (data.gold + data.bank) : 0;
-
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar isLoggedIn username={username} />
-
-        {selectedPokemon && (
-          <PokemonModal pokemon={selectedPokemon} onClose={() => setSelectedPokemon(null)} />
         )}
 
-        <main className="flex-1 pt-20 pb-12 px-4">
-          <div className="max-w-7xl mx-auto">
-            {loading && (
-              <div className="flex flex-col items-center justify-center py-32 gap-4">
-                <Loader2 className="w-10 h-10 text-[#00d4ff] animate-spin" />
-                <p className="text-gray-400">Loading your dashboard...</p>
-              </div>
-            )}
-
-            {error && !loading && (
-              <div className="text-center py-32">
-                <p className="text-red-400 text-lg mb-2">⚠️ {error}</p>
-                <p className="text-gray-500 text-sm">Make sure you set up your account with the bot first.</p>
-              </div>
-            )}
-
-            {data && !loading && (
-              <>
-                {/* ── Header: pfp + name + rank ── */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                  <div className="flex items-center gap-3">
-                    <div className="w-14 h-14 rounded-full border-2 border-[#00d4ff]/40 overflow-hidden flex-shrink-0 bg-[#1a1f2e] flex items-center justify-center">
-                      {data.profilePic
-                        ? <img src={data.profilePic} alt={data.username} className="w-full h-full object-cover" />
-                        : <span className="text-2xl">👤</span>}
-                    </div>
-                    <div>
-                      <h1 className="text-2xl font-bold text-white">{data.username}</h1>
-                      <p className="text-gray-500 text-sm">Trainer Dashboard</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`rank-badge border ${rankColor}`}>{data.rank}</span>
-                    <span className="text-gray-400 text-sm">Tier {data.level}</span>
-                  </div>
-                </div>
-
-                {/* ── Economy: Wallet + Bank + Total ── */}
-                <div className="glass-card p-5 mb-6">
-                  <p className="text-gray-400 text-xs uppercase tracking-wider mb-4">💰 Economy</p>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <p className="text-gray-500 text-xs mb-1">Wallet</p>
-                      <p className="text-white font-bold text-lg leading-tight break-all">{data.gold.toLocaleString()}</p>
-                      <p className="text-yellow-400 text-xs">gold</p>
-                    </div>
-                    <div className="text-center border-x border-[#2a2f45]">
-                      <p className="text-gray-500 text-xs mb-1">Bank</p>
-                      <p className="text-white font-bold text-lg leading-tight break-all">{data.bank.toLocaleString()}</p>
-                      <p className="text-green-400 text-xs">gold</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-gray-500 text-xs mb-1">Total</p>
-                      <p className="text-[#00d4ff] font-bold text-lg leading-tight break-all">{totalGold.toLocaleString()}</p>
-                      <p className="text-cyan-400 text-xs">gold</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ── Stats grid ── */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                  <StatCard icon={<TrendingUp className="w-4 h-4 text-[#00d4ff]" />} label="Total XP" value={data.xp} color="bg-cyan-500/10" />
-                  <StatCard icon={<span className="text-lg">🃏</span>} label="Cards" value={data.cards} color="bg-purple-500/10" />
-                  <StatCard icon={<span className="text-lg">🧠</span>} label="Quiz Wins" value={data.quizWins} sub={quizTotal > 0 ? `${quizRate}% win rate` : undefined} color="bg-pink-500/10" />
-                  <StatCard icon={<span className="text-lg">🎯</span>} label="Total Catches" value={data.totalCatches} color="bg-orange-500/10" />
-                </div>
-
-                {(data.wins > 0 || data.losses > 0) && (
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <StatCard icon={<span className="text-lg">⚔️</span>} label="Battle Wins" value={data.wins} color="bg-green-500/10" />
-                    <StatCard icon={<span className="text-lg">💀</span>} label="Battle Losses" value={data.losses} color="bg-red-500/10" />
-                  </div>
-                )}
-
-                {/* ── Pokémon tabs ── */}
-                <div className="mb-8">
-                  <div className="flex items-center gap-4 mb-4">
-                    <button onClick={() => setActiveTab("party")} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === "party" ? "bg-[#00d4ff] text-[#0d0f1a]" : "bg-[#1a1f2e] text-gray-400 hover:text-white border border-[#2a2f45]"}`}>
-                      ⚔️ Party
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === "party" ? "bg-[#0099cc]" : "bg-[#2a2f45]"}`}>{data.party.length}</span>
-                    </button>
-                    <button onClick={() => setActiveTab("pc")} className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${activeTab === "pc" ? "bg-[#00d4ff] text-[#0d0f1a]" : "bg-[#1a1f2e] text-gray-400 hover:text-white border border-[#2a2f45]"}`}>
-                      💾 PC Storage
-                      <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === "pc" ? "bg-[#0099cc]" : "bg-[#2a2f45]"}`}>{data.pc.length}</span>
-                    </button>
-                  </div>
-
-                  {activeTab === "party" && (
-                    data.party.length === 0
-                      ? <div className="glass-card p-12 text-center"><p className="text-4xl mb-3">⚔️</p><p className="text-gray-400">No Pokémon in your party</p></div>
-                      : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {data.party.map((p, i) => (
-                            <PokemonCard key={i} pokemon={p} slot={i} onClick={() => setSelectedPokemon(p)} />
-                          ))}
-                        </div>
-                  )}
-
-                  {activeTab === "pc" && (
-                    data.pc.length === 0
-                      ? <div className="glass-card p-12 text-center"><p className="text-4xl mb-3">💾</p><p className="text-gray-400">Your PC is empty</p></div>
-                      : <>
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                            {pcSlice.map((p, i) => (
-                              <PokemonCard key={i} pokemon={p} slot={i} />
-                            ))}
-                          </div>
-                          {pcPages > 1 && (
-                            <div className="flex items-center justify-center gap-3 mt-6">
-                              <button onClick={() => setPcPage(p => Math.max(0, p - 1))} disabled={pcPage === 0} className="px-4 py-2 rounded-lg bg-[#1a1f2e] text-gray-400 border border-[#2a2f45] disabled:opacity-40 hover:text-white text-sm">← Prev</button>
-                              <span className="text-gray-400 text-sm">Page {pcPage + 1} of {pcPages}</span>
-                              <button onClick={() => setPcPage(p => Math.min(pcPages - 1, p + 1))} disabled={pcPage >= pcPages - 1} className="px-4 py-2 rounded-lg bg-[#1a1f2e] text-gray-400 border border-[#2a2f45] disabled:opacity-40 hover:text-white text-sm">Next →</button>
-                            </div>
-                          )}
-                        </>
+        {pokemon.moves && pokemon.moves.length > 0 && (
+          <div>
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Moves</p>
+            <div className="grid grid-cols-2 gap-2">
+              {pokemon.moves.slice(0, 4).map((m, i) => (
+                <div key={i} className="bg-[#1a1f2e] rounded-lg px-3 py-2 text-xs">
+                  <p className="text-white font-medium capitalize">{m.name || "—"}</p>
+                  <p className="text-gray-500">
+                    {m.type || ""}
+                    {m.power ? ` · ${m.power} pwr` : ""}
+                  </p>
+                  {m.pp !== undefined && (
+                    <p className="text-gray-600">PP {m.pp}/{m.maxPp ?? m.pp}</p>
                   )}
                 </div>
-              </>
-            )}
+              ))}
+            </div>
           </div>
-        </main>
-        <Footer />
+        )}
       </div>
-    );
-  }
-  
+    </div>
+  );
+}
+
+function LetterAvatar({ name }: { name: string }) {
+  const letter = (name || "?")[0].toUpperCase();
+  const colors = [
+    ["#00d4ff", "#0099cc"],
+    ["#ffd700", "#cc9900"],
+    ["#9c27b0", "#6a0080"],
+    ["#e91e63", "#ad1457"],
+    ["#00bcd4", "#0097a7"],
+    ["#ff5722", "#bf360c"],
+    ["#4caf50", "#2e7d32"],
+  ];
+  const [bg1, bg2] = colors[letter.charCodeAt(0) % colors.length];
+  return (
+    <div
+      className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl text-white flex-shrink-0 border-2"
+      style={{
+        background: `linear-gradient(135deg, ${bg1} 0%, ${bg2} 100%)`,
+        borderColor: bg1 + "66",
+      }}
+    >
+      {letter}
+    </div>
+  );
+}
+
+function PokemonCard({
+  pokemon,
+  slot,
+  onClick,
+}: {
+  pokemon: Pokemon;
+  slot: number;
+  onClick?: () => void;
+}) {
+  const name = pokemon.name || pokemon.species || `Pokémon #${slot + 1}`;
+  const level = pokemon.level || 1;
+  const type = (pokemon.types?.[0] || pokemon.type || "normal").toLowerCase();
+  const typeColor = TYPE_COLORS[type] || "bg-gray-500/20 text-gray-300";
+  const hpPercent = pokemon.maxHp
+    ? Math.round(((pokemon.hp || 0) / pokemon.maxHp) * 100)
+    : 100;
+
+  return (
+    <div
+      className="pokemon-card p-4 relative overflow-hidden cursor-pointer hover:border-[#00d4ff]/50 transition-all"
+      onClick={onClick}
+    >
+      {pokemon.shiny && (
+        <div className="absolute top-2 right-2 text-xs text-yellow-400 font-bold">✨</div>
+      )}
+      <div className="flex items-start gap-3">
+        <div className="w-12 h-12 rounded-lg bg-[#0d0f1a] flex items-center justify-center text-2xl flex-shrink-0 border border-[#2a2f45]">
+          {pokemon.sprite ? (
+            <img src={pokemon.sprite} alt={name} className="w-10 h-10 object-contain" />
+          ) : (
+            "🔮"
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-white font-semibold text-sm capitalize truncate mb-1">{name}</h4>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-gray-400 text-xs">Lv.{level}</span>
+            <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${typeColor}`}>
+              {type}
+            </span>
+          </div>
+          {pokemon.maxHp && (
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>HP</span>
+                <span>
+                  {pokemon.hp}/{pokemon.maxHp}
+                </span>
+              </div>
+              <div className="stat-bar">
+                <div
+                  className="stat-bar-fill"
+                  style={{
+                    width: `${hpPercent}%`,
+                    background:
+                      hpPercent > 50 ? "#00d4ff" : hpPercent > 25 ? "#ffd700" : "#ef4444",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  sub,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  sub?: string;
+  color: string;
+}) {
+  return (
+    <div className="glass-card p-4 card-glow">
+      <div className={`w-9 h-9 rounded-lg ${color} flex items-center justify-center mb-3`}>
+        {icon}
+      </div>
+      <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-white font-bold text-xl leading-tight break-all">
+        {typeof value === "number" ? value.toLocaleString() : value}
+      </p>
+      {sub && <p className="text-gray-500 text-xs mt-1">{sub}</p>}
+    </div>
+  );
+}
+
+export default function DashboardClient({ username }: { username: string }) {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<"party" | "pc">("party");
+  const [pcPage, setPcPage] = useState(0);
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const PC_PER_PAGE = 18;
+
+  useEffect(() => {
+    fetch("/api/dashboard")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) setError(d.error);
+        else setData(d);
+      })
+      .catch(() => setError("Failed to load data"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const rankColor = data
+    ? RANK_COLORS[data.rankName] || RANK_COLORS.Rookie
+    : RANK_COLORS.Rookie;
+  const quizTotal = data ? data.quizWins + data.quizLosses : 0;
+  const quizRate =
+    quizTotal > 0 && data ? Math.round((data.quizWins / quizTotal) * 100) : 0;
+  const pcSlice = data
+    ? data.pc.slice(pcPage * PC_PER_PAGE, (pcPage + 1) * PC_PER_PAGE)
+    : [];
+  const pcPages = data ? Math.ceil(data.pc.length / PC_PER_PAGE) : 0;
+  const totalGold = data ? data.gold + data.bank : 0;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar isLoggedIn username={username} />
+
+      {selectedPokemon && (
+        <PokemonModal
+          pokemon={selectedPokemon}
+          onClose={() => setSelectedPokemon(null)}
+        />
+      )}
+
+      <main className="flex-1 pt-20 pb-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-32 gap-4">
+              <Loader2 className="w-10 h-10 text-[#00d4ff] animate-spin" />
+              <p className="text-gray-400">Loading your dashboard...</p>
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="text-center py-32">
+              <p className="text-red-400 text-lg mb-2">⚠️ {error}</p>
+              <p className="text-gray-500 text-sm">
+                Make sure you set up your account with the bot first.
+              </p>
+            </div>
+          )}
+
+          {data && !loading && (
+            <>
+              {/* ── Header: avatar + name + rank ── */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <div className="flex items-center gap-3">
+                  {data.profilePic ? (
+                    <img
+                      src={data.profilePic}
+                      alt={data.username}
+                      className="w-14 h-14 rounded-full border-2 border-[#00d4ff]/40 object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <LetterAvatar name={data.username} />
+                  )}
+                  <div>
+                    <h1 className="text-2xl font-bold text-white">{data.username}</h1>
+                    <p className="text-gray-500 text-sm">Trainer Dashboard</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`rank-badge border ${rankColor}`}>{data.rank}</span>
+                  <span className="text-gray-400 text-sm">Tier {data.level}</span>
+                </div>
+              </div>
+
+              {/* ── Economy card ── */}
+              <div className="glass-card p-5 mb-6">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-4">
+                  💰 Economy
+                </p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-gray-500 text-xs mb-1">Wallet</p>
+                    <p className="text-white font-bold text-lg leading-tight break-all">
+                      {data.gold.toLocaleString()}
+                    </p>
+                    <p className="text-yellow-400 text-xs">gold</p>
+                  </div>
+                  <div className="text-center border-x border-[#2a2f45]">
+                    <p className="text-gray-500 text-xs mb-1">Bank</p>
+                    <p className="text-white font-bold text-lg leading-tight break-all">
+                      {data.bank.toLocaleString()}
+                    </p>
+                    <p className="text-green-400 text-xs">gold</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-500 text-xs mb-1">Total</p>
+                    <p className="text-[#00d4ff] font-bold text-lg leading-tight break-all">
+                      {totalGold.toLocaleString()}
+                    </p>
+                    <p className="text-cyan-400 text-xs">gold</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Stat grid ── */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <StatCard
+                  icon={<TrendingUp className="w-4 h-4 text-[#00d4ff]" />}
+                  label="Total XP"
+                  value={data.xp}
+                  color="bg-cyan-500/10"
+                />
+                <StatCard
+                  icon={<span className="text-lg">🃏</span>}
+                  label="Cards"
+                  value={data.cards}
+                  color="bg-purple-500/10"
+                />
+                <StatCard
+                  icon={<span className="text-lg">🧠</span>}
+                  label="Quiz Wins"
+                  value={data.quizWins}
+                  sub={quizTotal > 0 ? `${quizRate}% win rate` : undefined}
+                  color="bg-pink-500/10"
+                />
+                <StatCard
+                  icon={<span className="text-lg">🎯</span>}
+                  label="Total Catches"
+                  value={data.totalCatches}
+                  color="bg-orange-500/10"
+                />
+              </div>
+
+              {(data.wins > 0 || data.losses > 0) && (
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <StatCard
+                    icon={<span className="text-lg">⚔️</span>}
+                    label="Battle Wins"
+                    value={data.wins}
+                    color="bg-green-500/10"
+                  />
+                  <StatCard
+                    icon={<span className="text-lg">💀</span>}
+                    label="Battle Losses"
+                    value={data.losses}
+                    color="bg-red-500/10"
+                  />
+                </div>
+              )}
+
+              {/* ── Pokémon tabs ── */}
+              <div className="mb-8">
+                <div className="flex items-center gap-4 mb-4">
+                  <button
+                    onClick={() => setActiveTab("party")}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                      activeTab === "party"
+                        ? "bg-[#00d4ff] text-[#0d0f1a]"
+                        : "bg-[#1a1f2e] text-gray-400 hover:text-white border border-[#2a2f45]"
+                    }`}
+                  >
+                    ⚔️ Party
+                    <span
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${
+                        activeTab === "party" ? "bg-[#0099cc]" : "bg-[#2a2f45]"
+                      }`}
+                    >
+                      {data.party.length}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("pc")}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                      activeTab === "pc"
+                        ? "bg-[#00d4ff] text-[#0d0f1a]"
+                        : "bg-[#1a1f2e] text-gray-400 hover:text-white border border-[#2a2f45]"
+                    }`}
+                  >
+                    💾 PC Storage
+                    <span
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${
+                        activeTab === "pc" ? "bg-[#0099cc]" : "bg-[#2a2f45]"
+                      }`}
+                    >
+                      {data.pc.length}
+                    </span>
+                  </button>
+                </div>
+
+                {activeTab === "party" &&
+                  (data.party.length === 0 ? (
+                    <div className="glass-card p-12 text-center">
+                      <p className="text-4xl mb-3">⚔️</p>
+                      <p className="text-gray-400">No Pokémon in your party</p>
+                      <p className="text-gray-600 text-sm mt-1">
+                        Catch some Pokémon in the bot!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {data.party.map((p, i) => (
+                        <PokemonCard
+                          key={i}
+                          pokemon={p}
+                          slot={i}
+                          onClick={() => setSelectedPokemon(p)}
+                        />
+                      ))}
+                    </div>
+                  ))}
+
+                {activeTab === "pc" &&
+                  (data.pc.length === 0 ? (
+                    <div className="glass-card p-12 text-center">
+                      <p className="text-4xl mb-3">💾</p>
+                      <p className="text-gray-400">Your PC is empty</p>
+                      <p className="text-gray-600 text-sm mt-1">
+                        Catch more Pokémon to fill your box!
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        {pcSlice.map((p, i) => (
+                          <PokemonCard key={i} pokemon={p} slot={i} />
+                        ))}
+                      </div>
+                      {pcPages > 1 && (
+                        <div className="flex items-center justify-center gap-3 mt-6">
+                          <button
+                            onClick={() => setPcPage((p) => Math.max(0, p - 1))}
+                            disabled={pcPage === 0}
+                            className="px-4 py-2 rounded-lg bg-[#1a1f2e] text-gray-400 border border-[#2a2f45] disabled:opacity-40 hover:text-white text-sm"
+                          >
+                            ← Prev
+                          </button>
+                          <span className="text-gray-400 text-sm">
+                            Page {pcPage + 1} of {pcPages}
+                          </span>
+                          <button
+                            onClick={() =>
+                              setPcPage((p) => Math.min(pcPages - 1, p + 1))
+                            }
+                            disabled={pcPage >= pcPages - 1}
+                            className="px-4 py-2 rounded-lg bg-[#1a1f2e] text-gray-400 border border-[#2a2f45] disabled:opacity-40 hover:text-white text-sm"
+                          >
+                            Next →
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ))}
+              </div>
+            </>
+          )}
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
