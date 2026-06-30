@@ -22,7 +22,7 @@ export default function SlotsClient({ username }: { username: string }) {
   const [spinning, setSpinning] = useState(false);
   const [bet, setBet] = useState(10_000);
   const [wallet, setWallet] = useState<number | null>(null);
-  const [result, setResult] = useState<{ won: boolean; winAmount: number; message: string } | null>(null);
+  const [result, setResult] = useState<{ won: boolean; winAmount: number; netChange: number; message: string } | null>(null);
   const [error, setError] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -49,12 +49,13 @@ export default function SlotsClient({ username }: { username: string }) {
       if (intervalRef.current) clearInterval(intervalRef.current);
       setDisplay(data.reels); setReels(data.reels);
       setWallet(data.newWallet);
-      setResult({ won: data.won, winAmount: data.winAmount, message: data.message });
+      setResult({ won: data.won, winAmount: data.winAmount, netChange: data.netChange, message: data.message });
     } catch { setError("Connection error."); }
     finally { if (intervalRef.current) clearInterval(intervalRef.current); setSpinning(false); }
   }
 
   const isWin = result?.won;
+  const isJackpot = result?.won && result.winAmount >= bet * 3;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -66,7 +67,7 @@ export default function SlotsClient({ username }: { username: string }) {
               🎰 Casino
             </div>
             <h1 className="font-display text-3xl sm:text-4xl font-bold gradient-text mb-2">Slot Machine</h1>
-            <p className="text-gray-400 text-sm">Match 2 = 2× bet · Match 3 = up to 50× · Max 1M gold</p>
+            <p className="text-gray-400 text-sm">Match 2 = 3× bet · Match 3 = up to 50× · No match = 40% refund</p>
           </div>
 
           <div className="glass-card p-6 mb-4">
@@ -78,15 +79,14 @@ export default function SlotsClient({ username }: { username: string }) {
 
             {/* Reels */}
             <div className="flex justify-center gap-3 mb-6 p-4 rounded-2xl bg-[#0a0c15] border-2"
-              style={{ borderColor: isWin ? "#ffd700" : "#2a2f45", boxShadow: isWin ? "0 0 30px rgba(255,215,0,0.3)" : "none", transition: "all 0.4s" }}>
+              style={{ borderColor: isJackpot ? "#ffd700" : isWin ? "#00d4ff" : "#2a2f45", boxShadow: isJackpot ? "0 0 40px rgba(255,215,0,0.5)" : isWin ? "0 0 20px rgba(0,212,255,0.3)" : "none", transition: "all 0.4s" }}>
               {display.map((sym, i) => (
                 <div key={i} className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border-2 flex items-center justify-center"
                   style={{
                     background: "rgba(13,15,26,0.95)",
-                    borderColor: spinning ? "#00d4ff" : (isWin ? "#ffd700" : "#2a2f45"),
-                    boxShadow: spinning ? "0 0 15px rgba(0,212,255,0.4)" : (isWin ? "0 0 15px rgba(255,215,0,0.4)" : "none"),
+                    borderColor: spinning ? "#00d4ff" : (isJackpot ? "#ffd700" : isWin ? "#00d4ff" : "#2a2f45"),
+                    boxShadow: spinning ? "0 0 15px rgba(0,212,255,0.4)" : (isJackpot ? "0 0 20px rgba(255,215,0,0.5)" : "none"),
                     transition: "all 0.3s",
-                    transform: spinning ? `translateY(${Math.sin(Date.now() / 100 + i) * 3}px)` : "none",
                   }}>
                   <span className="text-5xl select-none">{sym}</span>
                 </div>
@@ -95,10 +95,13 @@ export default function SlotsClient({ username }: { username: string }) {
 
             {/* Result */}
             {result && (
-              <div className={`rounded-xl p-4 mb-5 text-center border ${isWin ? "bg-yellow-500/10 border-yellow-500/40 text-yellow-300" : "bg-red-500/10 border-red-500/30 text-red-300"}`}>
+              <div className={`rounded-xl p-4 mb-5 text-center border ${isWin ? "bg-yellow-500/10 border-yellow-500/40 text-yellow-300" : "bg-orange-500/10 border-orange-500/30 text-orange-300"}`}>
                 <p className="font-bold text-lg">{result.message}</p>
-                {isWin && result.winAmount > 0 && (
-                  <p className="text-sm mt-1 text-yellow-400">+{result.winAmount.toLocaleString()} gold added to wallet!</p>
+                {result.netChange > 0 && (
+                  <p className="text-sm mt-1 text-green-400">+{result.netChange.toLocaleString()} gold profit!</p>
+                )}
+                {result.netChange < 0 && result.winAmount > 0 && (
+                  <p className="text-sm mt-1 text-orange-400">+{result.winAmount.toLocaleString()} gold refunded (only -{Math.abs(result.netChange).toLocaleString()} lost)</p>
                 )}
               </div>
             )}
@@ -146,12 +149,12 @@ export default function SlotsClient({ username }: { username: string }) {
               ))}
               <div className="border-t border-[#2a2f45] pt-2 mt-2 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm">Any 2 matching 🍒🍒❓</span>
-                  <span className="text-green-400 font-bold text-sm">2× bet</span>
+                  <span className="text-gray-400 text-sm">Any 2 matching</span>
+                  <span className="text-green-400 font-bold text-sm">3× bet (profit 2×)</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-gray-500 text-sm">No match</span>
-                  <span className="text-red-400 text-sm">lose bet</span>
+                  <span className="text-orange-400 text-sm">40% consolation refund</span>
                 </div>
               </div>
             </div>
