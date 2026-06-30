@@ -4,16 +4,14 @@ import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-// More balanced weights — 7️⃣ is 9% (was 1%), 🍒 is 20% (was 30%)
-// House edge ≈ 10% with generous 2-of-a-kind payout
 const POOL = [
-  ...Array(20).fill("🍒"),
-  ...Array(18).fill("🍋"),
-  ...Array(16).fill("🍊"),
-  ...Array(14).fill("🍇"),
+  ...Array(24).fill("🍒"),
+  ...Array(22).fill("🍋"),
+  ...Array(18).fill("🍊"),
+  ...Array(16).fill("🍇"),
   ...Array(12).fill("💎"),
-  ...Array(11).fill("⭐"),
-  ...Array(9).fill("7️⃣"),
+  ...Array(10).fill("⭐"),
+  ...Array(8).fill("7️⃣"),
 ];
 
 const PAYOUTS: Record<string, number> = {
@@ -46,7 +44,7 @@ export async function POST(req: Request) {
     const reels = [spinReel(), spinReel(), spinReel()];
     const [a, b, c] = reels;
 
-    let netChange = -bet;
+    let netChange = 0;
     let won = false;
     let winAmount = 0;
     let message = "";
@@ -62,13 +60,18 @@ export async function POST(req: Request) {
       else if (a === "💎")  message = "💎 BIG WIN! Triple Diamonds!";
       else                  message = `🎊 Winner! Triple ${a}!`;
     } else if (a === b || b === c || a === c) {
-      // 2-of-a-kind — return 2× bet (player profit = 1× bet)
-      winAmount = bet * 2;
-      netChange = bet; // profit = bet
+      // 2-of-a-kind — return 3× bet (net profit = 2× bet)
+      winAmount = bet * 3;
+      netChange = bet * 2;
       won = true;
-      message = "🎯 Two of a kind — you doubled your bet!";
+      message = "🎯 Two of a kind — you tripled your bet!";
     } else {
-      message = "😤 No match — spin again!";
+      // No match — 40% consolation refund so players only lose 60%
+      const refund = Math.floor(bet * 0.4);
+      netChange = -(bet - refund);
+      winAmount = refund;
+      won = false;
+      message = `😤 No match — consolation refund of ${refund.toLocaleString()} gold!`;
     }
 
     const newWallet = currentWallet + netChange;
@@ -81,7 +84,8 @@ export async function POST(req: Request) {
     return NextResponse.json({
       reels,
       won,
-      winAmount: won ? (a === b && b === c ? winAmount - bet : bet) : 0,
+      winAmount,
+      netChange,
       message,
       newWallet,
     });
