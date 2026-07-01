@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       caughtVia: "web-battle",
     };
 
-    await db.collection<UserDoc>("users").updateOne(
+    await (db.collection("users") as any).updateOne(
       { _id: session.botKey },
       { $push: { pc: caughtPokemon } as never },
       { upsert: true }
