@@ -76,7 +76,7 @@ import { NextResponse } from "next/server";
       }
 
       const newWallet = currentWallet + netChange;
-      await db.collection<EconomyDoc>("economy").updateOne(
+      await (db.collection("economy") as any).updateOne(
         { _id: session.botKey },
         { $inc: { wallet: netChange } },
         { upsert: true }
