@@ -4,7 +4,7 @@ import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-export const PACKAGES = [
+const PACKAGES = [
   { id: "starter",  label: "Starter Pack",  gold: 400_000_000,    naira: 500   },
   { id: "champion", label: "Champion Pack", gold: 1_000_000_000,  naira: 1000  },
   { id: "diamond",  label: "Diamond Pack",  gold: 2_500_000_000,  naira: 2000  },
