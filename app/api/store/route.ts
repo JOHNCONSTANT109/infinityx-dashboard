@@ -72,7 +72,8 @@ export async function POST(req: Request) {
       createdAt: Date.now(),
     };
 
-    await db.collection("payment_requests").insertOne(doc);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.collection("payment_requests").insertOne(doc as any);
 
     return NextResponse.json({ success: true, message: "Payment submitted! It will be reviewed shortly." });
   } catch (err) {
