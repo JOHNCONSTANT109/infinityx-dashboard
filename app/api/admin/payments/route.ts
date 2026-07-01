@@ -56,14 +56,14 @@ export async function POST(req: Request) {
 
     if (action === "approve") {
       // Credit gold to wallet
-      await db.collection("economy").updateOne(
+      await (db.collection("economy") as any).updateOne(
         { _id: payReq.userId },
         { $inc: { wallet: payReq.goldAmount } },
         { upsert: true }
       );
     }
 
-    await db.collection("payment_requests").updateOne(
+    await (db.collection("payment_requests") as any).updateOne(
       { _id: requestId },
       { $set: { status: newStatus, processedAt: Date.now() } }
     );
